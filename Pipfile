@@ -11,6 +11,9 @@ langchain-community = "*"
 openai = "*"
 pypdf = "*"
 pdfplumber = "*"
+langchain-chroma = "*"
+langchain-openai = "*"
+langchain-pinecone = "*"
 
 [dev-packages]
 
