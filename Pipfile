@@ -7,6 +7,8 @@ name = "pypi"
 langchain = "*"
 boto3 = "*"
 pinecone-client = {extras = ["grpc"], version = "*"}
+langchain-community = "*"
+openai = "*"
 
 [dev-packages]
 
