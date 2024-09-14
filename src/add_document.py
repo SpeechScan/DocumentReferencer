@@ -35,6 +35,8 @@ def embed_sections(sections, username):
     cloud = os.environ.get("pinecone_cloud")
     region = os.environ.get("pinecone_region")
     pinecone_api_key = os.environ.get("pinecone_api_key")
+    pinecone_embedding_model = os.environ.get("pinecone_embedding_model_name")
+    pinecone_dimension = int(os.environ.get("pinecone_embedding_model_dimension"))
 
     pc = Pinecone(api_key=pinecone_api_key)
     indexes = pc.list_indexes().indexes
@@ -43,7 +45,7 @@ def embed_sections(sections, username):
     if found_indexes == 0:
         pc.create_index(
             name=index_name,
-            dimension=1024,
+            dimension=pinecone_dimension,
             metric="cosine",
             spec=ServerlessSpec(
                 cloud=cloud,
@@ -52,8 +54,9 @@ def embed_sections(sections, username):
         )
 
     # Initialize a LangChain embedding object.
-    model_name = "multilingual-e5-large"
-    embeddings = PineconeEmbeddings(model=model_name, pinecone_api_key=pinecone_api_key)
+    embeddings = PineconeEmbeddings(
+        model=pinecone_embedding_model, pinecone_api_key=pinecone_api_key
+    )
 
     # Embed each chunk and upsert the embeddings into your Pinecone index.
     PineconeVectorStore.from_documents(
