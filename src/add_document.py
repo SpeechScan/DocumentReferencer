@@ -80,8 +80,8 @@ def store_in_file_store(file_path, username):
     s3.upload_file(file_path, bucket_name, object_name)
 
 def main():
-    username = "aloof"
-    doc_path = "./example.pdf"
+    username = "cv"
+    doc_path = "./cv.pdf"
     store_in_vector_store(doc_path, username)
     store_in_file_store(doc_path, username)
 
