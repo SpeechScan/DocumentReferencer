@@ -1,5 +1,10 @@
-import boto3
+import os
+from pinecone import ServerlessSpec
+from pinecone.grpc import PineconeGRPC as Pinecone
 
-s3 = boto3.resource("s3")
-for bucket in s3.buckets.all():
-    print(bucket.name)
+pc = Pinecone(api_key=os.getenv("pinecone_api_key"))
+
+index_name = "example-index"
+index = pc.Index(index_name)
+
+

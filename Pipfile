@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 langchain = "*"
 boto3 = "*"
+pinecone-client = {extras = ["grpc"], version = "*"}
 
 [dev-packages]
 
