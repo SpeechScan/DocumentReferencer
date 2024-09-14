@@ -1,4 +1,5 @@
 import os
+import boto3
 from langchain_community.document_loaders import PDFPlumberLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_pinecone import PineconeEmbeddings
@@ -29,7 +30,7 @@ def section_chunk(chunk, section_size = 1000, section_overlap = 200):
     splits = text_splitter.split_documents(chunk)
     return splits
 
-def embed_sections(sections):
+def embed_sections(sections, username):
     index_name = os.environ.get("pinecone_index_name")
     cloud = os.environ.get("pinecone_cloud")
     region = os.environ.get("pinecone_region")
@@ -59,22 +60,27 @@ def embed_sections(sections):
         documents=sections,
         index_name=index_name,
         embedding=embeddings,
-        namespace="wondervector5000",
+        namespace=username,
     )
 
-def store_in_vector_store(file_path):
+def store_in_vector_store(file_path, username):
     pdf_loader = get_pdf_loader(file_path)
     for chunk in chunk_pdf(pdf_loader):
         sections = section_chunk(chunk)
-        embed_sections(sections)
+        embed_sections(sections, username)
 
-def store_in_file_store(file_path):
-    
+def store_in_file_store(file_path, username):
+    bucket_name = os.environ.get("s3_bucket")
+    object_name = f"{username}/{os.path.basename(file_path)}"
+
+    s3 = boto3.client("s3")
+    s3.upload_file(file_path, bucket_name, object_name)
 
 def main():
+    username = "aloof"
     doc_path = "./example.pdf"
-    store_in_vector_store(doc_path)
-    
+    store_in_vector_store(doc_path, username)
+    store_in_file_store(doc_path, username)
 
 
 if __name__ == "__main__":
