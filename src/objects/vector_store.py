@@ -60,15 +60,13 @@ class ChromaVectorStoreClient:
         self.collection_name = f"example_collection_{username}"
         self.vector_store = Chroma(
             collection_name=self.collection_name,
-            embedding_function=embeddings
+            embedding_function=embeddings,
+            persist_directory='dev_vector_db'
         )
 
     def add_documents(self, documents, ids):
-        try:
-            self.vector_store.add_documents(documents=documents, ids=ids)
-        except Exception as e:
-            print(f"Failed to embed documents: {e}")
-            print(f"Response status code: {e.status_code}")
+        ids = self.vector_store.add_documents(documents=documents, ids=ids)
+        return ids
 
     def as_retriever(self):
         return self.vector_store.as_retriever()
