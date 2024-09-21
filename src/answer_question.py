@@ -1,5 +1,4 @@
-from langchain_openai import ChatOpenAI
-from langchain_core.output_parsers import StrOutputParser
+from .objects import llm
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_pinecone import Pinecone
@@ -19,20 +18,10 @@ def format_sections(sections):
 
 def main():
     username = "aloof"
-    openai_api_key = os.environ.get("openai_api_key")
-    openai_model_name = os.environ.get("openai_model_name")
 
     pinecone_api_key = os.environ.get("pinecone_api_key")
     pinecone_index = os.environ.get("pinecone_index_name")
     pinecone_embedding_model = os.environ.get("pinecone_embedding_model_name")
-
-    # Initialize a LangChain object for chatting with the LLM
-    # without knowledge from Pinecone.
-    llm = ChatOpenAI(
-        openai_api_key=openai_api_key,
-        model_name=openai_model_name,
-        temperature=0.0,
-    )
 
     embedding = PineconeEmbeddings(
         model=pinecone_embedding_model, pinecone_api_key=pinecone_api_key
