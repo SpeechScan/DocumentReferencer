@@ -34,4 +34,4 @@ if mode != "prod":
         s3_client.create_bucket(Bucket=bucket_name)
         print(f"Bucket '{bucket_name}' created successfully.")
     except s3_client.exceptions.BucketAlreadyOwnedByYou:
-        print(f"Bucket '{bucket_name}' already exists.")
+        pass

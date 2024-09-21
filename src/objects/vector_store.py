@@ -50,6 +50,11 @@ class PineconeVectorStoreClient:
             documents=documents, ids=ids, namespace=self.namespace
         )
 
+    def delete_documents(self, file_path):
+        index = self.pinecone_client.Index(self.index_name)
+        for ids in index.list(namespace=self.namespace, prefix=file_path):
+            index.delete(ids=ids, namespace=self.namespace)
+
     def as_retriever(self):
         return self.vector_store.as_retriever(namespace=self.namespace)
 
@@ -67,6 +72,10 @@ class ChromaVectorStoreClient:
     def add_documents(self, documents, ids):
         ids = self.vector_store.add_documents(documents=documents, ids=ids)
         return ids
+
+    def delete_documents(self, file_path):
+        docs = self.vector_store.get(where={"file_path": file_path})
+        self.vector_store.delete(docs['ids'])
 
     def as_retriever(self):
         return self.vector_store.as_retriever()
