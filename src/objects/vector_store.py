@@ -18,7 +18,7 @@ vector_store = (
     else Chroma(
         collection_name="example_collection",
         embedding_function=embeddings,
-        persist_directory="./chroma_langchain_db",
+        persist_directory="./local-vector-storage",
     )
 )
 

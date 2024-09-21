@@ -154,8 +154,9 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# langChain local testing
-chroma_langchain_db/
+# local development
+local-vector-storage/
+local-file-storage/
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
