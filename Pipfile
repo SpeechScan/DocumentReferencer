@@ -15,6 +15,7 @@ langchain-chroma = "*"
 langchain-openai = "*"
 langchain-pinecone = "*"
 langchain-huggingface = "*"
+s3fs = "*"
 
 [dev-packages]
 

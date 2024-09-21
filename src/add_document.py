@@ -1,5 +1,5 @@
 import os
-import boto3
+from .objects import file_store
 from .objects import vector_store
 from langchain_community.document_loaders import PDFPlumberLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -55,18 +55,8 @@ def store_in_vector_store(file_path):
 
 
 def store_in_file_store(file_path):
-    bucket_name = os.environ.get("s3_bucket")
-    aws_access_key_id = os.environ.get("aws_access_key_id")
-    aws_secret_access_key = os.environ.get("aws_secret_access_key")
-
     object_name = f"{username}/{os.path.basename(file_path)}"
-
-    s3 = boto3.client(
-        "s3",
-        aws_access_key_id=aws_access_key_id,
-        aws_secret_access_key=aws_secret_access_key,
-    )
-    s3.upload_file(file_path, bucket_name, object_name)
+    file_store.upload_file(file_path, object_name)
 
 
 def main():
