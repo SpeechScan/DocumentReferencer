@@ -1,16 +1,11 @@
 import os
 from .objects import get_vector_store
 from .objects import s3_client
-from langchain_community.document_loaders import PDFPlumberLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from .splitters import get_text_splitter
+from .loaders import get_pdf_loader
 
 username = os.environ.get("username")
 doc_path = os.environ.get("doc_path")
-
-def get_pdf_loader(file_path):
-    loader = PDFPlumberLoader(file_path)
-    return loader
-
 
 def chunk_pdf(pdf_loader, chunk_size=10):
     page = []
@@ -25,7 +20,7 @@ def chunk_pdf(pdf_loader, chunk_size=10):
 
 
 def section_chunk(chunk, section_size=1000, section_overlap=200):
-    text_splitter = RecursiveCharacterTextSplitter(
+    text_splitter = get_text_splitter(
         chunk_size=section_size, chunk_overlap=section_overlap
     )
     splits = text_splitter.split_documents(chunk)

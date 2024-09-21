@@ -3,7 +3,7 @@ from .parsers.models import Statement
 from .parsers import get_json_parser
 from .objects import get_vector_store
 from .prompts import get_inconcistencies_prompt
-from langchain_core.runnables import RunnablePassthrough
+from .runnables import passthrough
 import os
 
 username = os.getenv("username")
@@ -17,7 +17,7 @@ def main():
     prompt = get_inconcistencies_prompt(parser)
 
     chain = (
-        {"context": vector_store.as_retriever(), "statement": RunnablePassthrough()}
+        {"context": vector_store.as_retriever(), "statement": passthrough}
         | prompt
         | llm
         | parser
