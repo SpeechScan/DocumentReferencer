@@ -16,6 +16,8 @@ langchain-openai = "*"
 langchain-pinecone = "*"
 langchain-huggingface = "*"
 s3fs = "*"
+openllm = "*"
+langchain-ollama = "*"
 
 [dev-packages]
 

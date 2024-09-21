@@ -1,12 +1,13 @@
 from .objects import llm
+from .objects import get_vector_store
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
-from langchain_pinecone import Pinecone
-from langchain_pinecone import PineconeEmbeddings
 from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
 from typing import List
 import os
+
+username = os.getenv("username")
 
 class Statement(BaseModel):
     statement: str = Field(description="A statement said by a person")
@@ -17,18 +18,7 @@ def format_sections(sections):
     return "\n\n".join([d.page_content for d in sections])
 
 def main():
-    username = "aloof"
-
-    pinecone_api_key = os.environ.get("pinecone_api_key")
-    pinecone_index = os.environ.get("pinecone_index_name")
-    pinecone_embedding_model = os.environ.get("pinecone_embedding_model_name")
-
-    embedding = PineconeEmbeddings(
-        model=pinecone_embedding_model, pinecone_api_key=pinecone_api_key
-    )
-    pc = Pinecone(pinecone_api_key=pinecone_api_key, embedding=embedding)
-    vector_store = pc.from_existing_index(namespace=username, index_name=pinecone_index, embedding=embedding)
-
+    vector_store = get_vector_store(username=username)
     parser = JsonOutputParser(pydantic_object=Statement)
 
     inconsistencies_template = """

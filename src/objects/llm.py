@@ -1,6 +1,6 @@
 import os
 from langchain_openai import ChatOpenAI
-from langchain_community.llms import OpenLLM
+from langchain_community.llms import Ollama
 
 mode = os.environ.get("mode")
 openai_api_key = os.environ.get("openai_api_key")
@@ -13,10 +13,5 @@ llm = (
         temperature=0.0,
     )
     if mode == "prod"
-    else OpenLLM(
-        model_name="dolly-v2",
-        model_id="databricks/dolly-v2-3b",
-        temperature=0.94,
-        repetition_penalty=1.2,
-    )
+    else Ollama(model="mistral")
 )

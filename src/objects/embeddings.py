@@ -1,6 +1,6 @@
 import os
 from langchain_pinecone import PineconeEmbeddings
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_ollama import OllamaEmbeddings
 
 mode = os.environ.get("mode")
 pinecone_api_key = os.environ.get("pinecone_api_key")
@@ -11,5 +11,7 @@ embeddings = (
         model=pinecone_embedding_model, pinecone_api_key=pinecone_api_key
     )
     if mode == "prod"
-    else HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
+    else OllamaEmbeddings(
+        model="nomic-embed-text"
+    )
 )

@@ -1,39 +1,84 @@
 import os
 from langchain_chroma import Chroma
-from .embeddings import embeddings
-from pinecone import ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
+from pinecone import ServerlessSpec
 from pinecone.grpc import PineconeGRPC as Pinecone
+from .embeddings import embeddings  # Ensure this is correctly set up for your use case
 
-mode = os.environ.get("mode")
-cloud = os.environ.get("pinecone_cloud")
-region = os.environ.get("pinecone_region")
-index_name = os.environ.get("pinecone_index_name")
-pinecone_api_key = os.environ.get("pinecone_api_key")
-pinecone_dimension = int(os.environ.get("pinecone_embedding_model_dimension"))
+# Common configurations
+mode = os.getenv("mode")
+index_name = os.getenv("pinecone_index_name")
+pinecone_api_key = os.getenv("pinecone_api_key")
+pinecone_dimension = int(os.getenv("pinecone_embedding_model_dimension", 1536))
+cloud = os.getenv("pinecone_cloud")
+region = os.getenv("pinecone_region")
 
-vector_store = (
-    PineconeVectorStore(index_name=index_name, embedding=embeddings)
-    if mode == "prod"
-    else Chroma(
-        collection_name="example_collection",
-        embedding_function=embeddings,
-        persist_directory="./local-vector-storage",
-    )
-)
 
-if mode == "prod":
-    pc = Pinecone(api_key=pinecone_api_key)
-    indexes = pc.list_indexes().indexes
-    found_indexes = list(filter(lambda index: index["name"] == index_name, indexes))
-
-    if len(found_indexes) == 0:
-        pc.create_index(
-            name=index_name,
-            dimension=pinecone_dimension,
-            metric="cosine",
-            spec=ServerlessSpec(
-                cloud=cloud,
-                region=region,
-            ),
+# Production class using Pinecone
+class PineconeVectorStoreClient:
+    def __init__(self, index_name, embedding, namespace):
+        self.index_name = index_name
+        self.embedding = embedding
+        self.namespace = namespace
+        self.pinecone_client = Pinecone(api_key=pinecone_api_key)
+        self.vector_store = PineconeVectorStore(
+            index_name=index_name, embedding=embedding
         )
+
+        # Check and create the index if it doesn't exist
+        self.ensure_index_exists()
+
+    def ensure_index_exists(self):
+        indexes = self.pinecone_client.list_indexes().indexes
+        found_indexes = list(
+            filter(lambda index: index["name"] == self.index_name, indexes)
+        )
+
+        if not found_indexes:
+            self.pinecone_client.create_index(
+                name=self.index_name,
+                dimension=pinecone_dimension,
+                metric="cosine",
+                spec=ServerlessSpec(
+                    cloud=cloud,
+                    region=region,
+                ),
+            )
+
+    def add_documents(self, documents, ids):
+        self.vector_store.add_documents(
+            documents=documents, ids=ids, namespace=self.namespace
+        )
+
+    def as_retriever(self):
+        return self.vector_store.as_retriever(namespace=self.namespace)
+
+
+# Development class using Chroma
+class ChromaVectorStoreClient:
+    def __init__(self, username):
+        self.collection_name = f"example_collection_{username}"
+        self.vector_store = Chroma(
+            collection_name=self.collection_name,
+            embedding_function=embeddings
+        )
+
+    def add_documents(self, documents, ids):
+        try:
+            self.vector_store.add_documents(documents=documents, ids=ids)
+        except Exception as e:
+            print(f"Failed to embed documents: {e}")
+            print(f"Response status code: {e.status_code}")
+
+    def as_retriever(self):
+        return self.vector_store.as_retriever()
+
+
+# Factory function to initialize the correct vector store based on mode
+def get_vector_store(username):
+    if mode == "prod":
+        return PineconeVectorStoreClient(
+            index_name=index_name, embedding=embeddings, namespace=username
+        )
+    else:
+        return ChromaVectorStoreClient(username=username)

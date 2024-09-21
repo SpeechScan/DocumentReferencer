@@ -1,10 +1,11 @@
 import os
-from .objects import file_store
-from .objects import vector_store
+from .objects import get_vector_store
+from .objects import s3_client
 from langchain_community.document_loaders import PDFPlumberLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 username = os.environ.get("username")
+doc_path = os.environ.get("doc_path")
 
 def get_pdf_loader(file_path):
     loader = PDFPlumberLoader(file_path)
@@ -41,28 +42,29 @@ def embed_sections(sections, doc_path, start_from):
     ids = [f"{doc_path}-{i}" for i in range(start_from, start_from + len(sections))]
 
     # Upsert sections with incremental IDs
-    vector_store.add_documents(documents=sections, ids=ids, namespace=username)
+    vector_store = get_vector_store(username)
+    vector_store.add_documents(sections, ids)
     # Return the updated start_from value for the next chunk
     return start_from + len(sections)
 
 
-def store_in_vector_store(file_path):
-    pdf_loader = get_pdf_loader(file_path)
+def store_in_vector_store():
+    pdf_loader = get_pdf_loader(doc_path)
     start_from = 0
     for chunk in chunk_pdf(pdf_loader):
         sections = section_chunk(chunk)
-        start_from = embed_sections(sections, file_path, start_from)
+        start_from = embed_sections(sections, doc_path, start_from)
 
 
-def store_in_file_store(file_path):
-    object_name = f"{username}/{os.path.basename(file_path)}"
-    file_store.upload_file(file_path, object_name)
+def store_in_file_store():
+    bucket_name = os.getenv("s3_bucket")
+    object_name = f"{username}/{os.path.basename(doc_path)}"
+    s3_client.upload_file(doc_path, bucket_name, object_name)
 
 
 def main():
-    doc_path = "./kekw.pdf"
-    store_in_vector_store(doc_path)
-    store_in_file_store(doc_path)
+    store_in_vector_store()
+    store_in_file_store()
 
 if __name__ == "__main__":
     main()
