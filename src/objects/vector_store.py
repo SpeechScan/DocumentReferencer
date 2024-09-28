@@ -20,9 +20,11 @@ class PineconeVectorStoreClient:
         self.index_name = index_name
         self.embedding = embedding
         self.namespace = namespace
-        self.pinecone_client = Pinecone(api_key=pinecone_api_key)
+        self.pinecone_client = Pinecone(
+            api_key=pinecone_api_key
+        )
         self.vector_store = PineconeVectorStore(
-            index_name=index_name, embedding=embedding
+            index_name=index_name, embedding=embedding, pinecone_api_key=pinecone_api_key
         )
 
         # Check and create the index if it doesn't exist
