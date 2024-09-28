@@ -13,8 +13,7 @@ if __name__ == "__main__":
         rabbit_broker_id, rabbit_user, rabbit_password, rabbit_region
     )
 
-    # Consume the message that was sent.
-    basic_message_receiver.get_message("hello world queue")
+    basic_message_receiver.consume_messages("hello world queue")
 
     # Close connections.
     basic_message_receiver.close()
