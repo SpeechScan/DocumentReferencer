@@ -23,18 +23,24 @@ class PineconeVectorStoreClient:
         self.pinecone_client = Pinecone(
             api_key=pinecone_api_key
         )
-        self.vector_store = PineconeVectorStore(
-            index_name=index_name, embedding=embedding, pinecone_api_key=pinecone_api_key
-        )
 
         # Check and create the index if it doesn't exist
         self.ensure_index_exists()
+        print(index_name, embedding, pinecone_api_key)
+
+        self.vector_store = PineconeVectorStore(
+            index_name=index_name,
+            embedding=embedding,
+            pinecone_api_key=pinecone_api_key,
+        )
 
     def ensure_index_exists(self):
         indexes = self.pinecone_client.list_indexes().indexes
         found_indexes = list(
             filter(lambda index: index["name"] == self.index_name, indexes)
         )
+
+        print(found_indexes)
 
         if not found_indexes:
             self.pinecone_client.create_index(
@@ -58,7 +64,8 @@ class PineconeVectorStoreClient:
             index.delete(ids=ids, namespace=self.namespace)
 
     def as_retriever(self):
-        return self.vector_store.as_retriever(namespace=self.namespace)
+        print(self.namespace)
+        return self.vector_store.as_retriever(namespace=self.namespace, index_name=self.index_name)
 
 
 # Development class using Chroma

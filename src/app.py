@@ -1,4 +1,3 @@
-import os
 from .messaging import MessageReceiver
 from .services import DocumentService
 
@@ -9,16 +8,8 @@ def add_rabbitmq_handler(message_receiver, queue, callback):
         lambda ch, method, properties, body: callback(body),
     )
 
-
 def rabbitmq_start_listening():
-    rabbit_broker_id = os.getenv("rabbitmq_broker_id")
-    rabbit_user = os.getenv("rabbitmq_user")
-    rabbit_password = os.getenv("rabbitmq_password")
-    rabbit_region = os.getenv("rabbitmq_region")
-
-    message_receiver = MessageReceiver(
-        rabbit_broker_id, rabbit_user, rabbit_password, rabbit_region
-    )
+    message_receiver = MessageReceiver()
     document_service = DocumentService()
 
     add_rabbitmq_handler(

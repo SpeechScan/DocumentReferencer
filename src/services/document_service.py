@@ -6,8 +6,9 @@ from src.loaders import get_pdf_loader
 from src.parsers.models import Statement
 from src.parsers import get_json_parser
 from src.prompts import get_inconcistencies_prompt
-from src.runnables import passthrough
+from src.runnables import passthrough, RunnableLambda
 from src.objects import llm
+
 
 class DocumentService:
     def __init__(self) -> None:
@@ -22,6 +23,7 @@ class DocumentService:
         start_from = 0
         for chunk in self.__chunk_pdf(pdf_loader):
             sections = self.__section_chunk(chunk)
+            print(sections, start_from)
             start_from = self.__embed_sections(sections, start_from)
         s3_client.upload_file(self.doc_path, self.bucket_name, self.__get_file_name())
 
@@ -31,17 +33,30 @@ class DocumentService:
             prompt = get_inconcistencies_prompt(parser)
 
             chain = (
-                {"context": self.vector_store.as_retriever(), "statement": passthrough}
+                {
+                    "context": self.vector_store.as_retriever()
+                    | DocumentService.format_docs,
+                    "statement": passthrough,
+                }
+                | RunnableLambda(DocumentService.__print_body)
                 | prompt
                 | llm
                 | parser
             )
-            print('RECEIVED:', statement)
-            
+
             response = chain.invoke(statement)
-            print(response)
+            print("response:", response)
         except Exception as e:
             print(str(e))
+
+    @staticmethod
+    def format_docs(docs):
+        return "\n\n".join(doc.page_content for doc in docs)
+
+    @staticmethod
+    def __print_body(prompt):
+        print("prompt:", prompt)
+        return prompt
 
     def delete_document(self):
         self.vector_store.delete_documents(self.doc_path)
@@ -76,7 +91,10 @@ class DocumentService:
             return start_from
 
         # Generate IDs starting from `start_from`
-        ids = [f"{self.doc_path}-{i}" for i in range(start_from, start_from + len(sections))]
+        ids = [
+            f"{self.doc_path}-{i}"
+            for i in range(start_from, start_from + len(sections))
+        ]
 
         # Upsert sections with incremental IDs
         self.vector_store.add_documents(sections, ids)

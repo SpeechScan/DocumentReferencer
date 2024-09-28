@@ -23,6 +23,14 @@ services:
       CHROMA_DB_PATH: /data/chroma  # Persistent storage path
     volumes:
       - chroma-data:/data/chroma
+
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
   
   ollama:
     ports:
@@ -46,3 +54,4 @@ volumes:
   minio-data:
   chroma-data:
   ollama-data:
+  rabbitmq-data:

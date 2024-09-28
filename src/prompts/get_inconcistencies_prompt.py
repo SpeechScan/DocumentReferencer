@@ -2,7 +2,7 @@ from langchain_core.prompts import ChatPromptTemplate
 
 def get_inconcistencies_prompt(json_parser):
     inconsistencies_template = """
-        Confirm or reject the statement said by a user based on your context.
+        Confirm or reject the statement said by a user based on your context. Use language inside of context in your answer.
         CONTEXT:
         {context}
 
