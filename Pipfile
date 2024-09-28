@@ -18,6 +18,7 @@ langchain-huggingface = "*"
 s3fs = "*"
 openllm = "*"
 langchain-ollama = "*"
+pika = "*"
 
 [dev-packages]
 
@@ -29,3 +30,4 @@ dev = "python -m src.app"
 add = "python -m src.add_document"
 answer = "python -m src.answer_question"
 delete = "python -m src.delete_document"
+consume = "python -m src.consume_message"
